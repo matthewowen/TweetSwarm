@@ -1,13 +1,16 @@
 from flask import Flask, render_template, url_for, g, redirect, request
-import httplib2, redis, sqlite3
+import httplib2, redis, sqlite3, tweepy
+import settings
+
+auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
 
 app = Flask(__name__)
 
 class TweetNet(object):
 	"""
-	a TweetNet has a controlling account
-	it also has a number of controlled accounts
-	the controlling account can make the controlled accounts retweet something
+	a TweetNet has a master account
+	it also has a number of slave accounts
+	the master account can make the slave accounts retweet something by using a callsign in a tweet
 	"""
 
 	def tweet_out(self, tweet):
@@ -34,9 +37,43 @@ class Account(object):
 	"""
 
 	def tweet(self, tweet):
-		#tweet the tweet here
+		#set up the access credentials
+		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
+		auth.set_access_token(self.access_key, self.access_secret)
+
+		#now do the tweet
+		api = tweepyAPI(auth)
+		api.retweet(tweet)
+
 		return True
 
-	def __init__(self, id):
+	def authorise_callback(self):
+		"""
+		finishes off the authorisation process (once a user has come back to us)
+		"""
+		verifier = request.GET.get('oauth_verifier')
+
+		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+		token = session.request_token
+		auth.set_request_token(token.key, token.secret)
+
+		auth.get_access_token(verifier)
+
+		self.access_key = auth.access_token.key
+		self.access_secret = auth.access_token.secret
+
+	def authorise(self):
+		"""
+		starts the authorisation process.
+		"""
+		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET, settings.CALLBACK_URL)
+
+		session.request_token = {'key': auth.request_token.key, 'secret': auth.request_token.secret}
+
+		return redirect(auth.get_authorization_url())
+
+	def __init__(self):
 		"""
 		TODO: twitter account stuff goes here
+		"""
+		return authorise()

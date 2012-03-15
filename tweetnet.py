@@ -1,7 +1,5 @@
 import model
 
-import json as simplejson
-
 app = Flask(__name__)
 
 # UTILITIES
@@ -24,6 +22,12 @@ def page_not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
 	return render_template('500.html'), 500
+
+# TWITTER AUTH
+
+@app.route('/auth/callback', methods=['POST'])
+def callback():
+	#do the callback stuff
 
 # INPUT
 
@@ -54,7 +58,6 @@ def botnets():
 @app.route('/')
 def home():
 	return render_template('home.html')
-
 
 # RUN CONFIG
 
