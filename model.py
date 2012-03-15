@@ -1,10 +1,12 @@
-from flask import Flask, render_template, url_for, g, redirect, request
-import httplib2, redis, sqlite3, tweepy
+from flask import Flask, render_template, session, url_for, g, redirect, request
+import tweepy
 import settings
 
 auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
 
 app = Flask(__name__)
+
+app.secret_key = settings.SECRET_KEY
 
 class TweetNet(object):
 	"""
@@ -51,16 +53,18 @@ class Account(object):
 		"""
 		finishes off the authorisation process (once a user has come back to us)
 		"""
-		verifier = request.GET.get('oauth_verifier')
+		verifier = request.args.get('oauth_verifier')
 
-		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-		token = session.request_token
-		auth.set_request_token(token.key, token.secret)
+		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET, settings.CALLBACK_URL)
+		token = session['request_token']
+		auth.set_request_token(token[0], token[1])
 
 		auth.get_access_token(verifier)
 
 		self.access_key = auth.access_token.key
 		self.access_secret = auth.access_token.secret
+
+		return render_template('authorised.html')
 
 	def authorise(self):
 		"""
@@ -68,12 +72,8 @@ class Account(object):
 		"""
 		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET, settings.CALLBACK_URL)
 
-		session.request_token = {'key': auth.request_token.key, 'secret': auth.request_token.secret}
+		redirect_url = auth.get_authorization_url()
 
-		return redirect(auth.get_authorization_url())
+		session['request_token'] = [auth.request_token.key, auth.request_token.secret]
 
-	def __init__(self):
-		"""
-		TODO: twitter account stuff goes here
-		"""
-		return authorise()
+		return redirect(redirect_url)

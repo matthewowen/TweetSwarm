@@ -1,9 +1,14 @@
+from flask import Flask, render_template, session, url_for, g, redirect, request
+
 import model
+import settings
 
 app = Flask(__name__)
 
-# UTILITIES
+app.secret_key = settings.SECRET_KEY
 
+# UTILITIES
+"""
 @app.before_request
 def before_request():
     g.db = connect_db()
@@ -12,7 +17,7 @@ def before_request():
 def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
-
+"""
 # ERRORS
 
 @app.errorhandler(404)
@@ -25,9 +30,16 @@ def internal_error(error):
 
 # TWITTER AUTH
 
-@app.route('/auth/callback', methods=['POST'])
+@app.route('/auth/')
+def twitter_auth():
+	t = model.Account()
+	return t.authorise()
+
+@app.route('/auth/callback')
 def callback():
 	#do the callback stuff
+	t = model.Account()
+	return t.authorise_callback()
 
 # INPUT
 
