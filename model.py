@@ -10,12 +10,33 @@ class TweetNet(object):
 	the controlling account can make the controlled accounts retweet something
 	"""
 
-	def __init__(self, name, account):
-		self.name = name
-		self.controllingAccount = account
+	def tweet_out(self, tweet):
+		for slave in self.slaves:
+			slave.tweet(tweet)
+		return True
 
+	def add_account(self, account):
+		try:
+			self.slaves.append(account)
+			return True
+		except:
+			return False
+
+	def __init__(self, name, account, callsign):
+		self.name = name
+		self.master = account
+		self.callsign = callsign
+		self.slaves = []
 
 class Account(object):
 	"""
 	a twitter account
 	"""
+
+	def tweet(self, tweet):
+		#tweet the tweet here
+		return True
+
+	def __init__(self, id):
+		"""
+		TODO: twitter account stuff goes here

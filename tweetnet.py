@@ -28,11 +28,16 @@ def internal_error(error):
 # INPUT
 
 @app.route('/tweetnets/<tweetnet>', methods=['GET', 'POST'])
-def botnet():
+def botnet(tweetnet):
 	"""
 	if get, tweetnet info
 	if post, add to tweetnet
 	"""
+	if request.method == 'POST':
+		tweetnet.add_account(account)
+		return render_template('account_added.html')
+	else:
+		return render_template('tweetnet.html')
 
 @app.route('/tweetnets/', methods=['GET', 'POST'])
 def botnets():
@@ -40,10 +45,15 @@ def botnets():
 	if get, tweetnet creation page
 	if post, create a tweetnet
 	"""
+	if request.method == 'POST':
+		tweetnet = TweetNet(request.form['name'], request.form['account'], request.form['callsign'])
+		return redirect#TODO
+	else:
+		return render_template('create_tweetnet.html')
 
 @app.route('/')
 def home():
-	return render_template('get_location.html')
+	return render_template('home.html')
 
 
 # RUN CONFIG
