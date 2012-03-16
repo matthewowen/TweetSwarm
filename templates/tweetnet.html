@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h2>{{ tweetnet.name }}</h2>
+<h3>{{ tweetnet.master }}</h3>
+<h3>{{ tweetnet.callsign }}</h3>
+
+<form action="/tweetnets/{{ tweetnet.name }}/" method="post">
+	<input type="submit" value="Submit!">
+</form>
+{% endblock %}

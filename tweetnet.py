@@ -1,14 +1,15 @@
 from flask import Flask, render_template, session, url_for, g, redirect, request
 
-import model
-import settings
+import tweepy, settings, sqlite3, model
+
+DATABASE = 'db'
 
 app = Flask(__name__)
 
 app.secret_key = settings.SECRET_KEY
 
 # UTILITIES
-"""
+
 @app.before_request
 def before_request():
     g.db = connect_db()
@@ -17,7 +18,16 @@ def before_request():
 def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
-"""
+
+def connect_db():
+    return sqlite3.connect(DATABASE)
+
+def query_db(query, args=(), one=False):
+    cur = g.db.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row)) for row in cur.fetchall()]
+    return (rv[0] if rv else None) if one else rv
+
 # ERRORS
 
 @app.errorhandler(404)
@@ -43,17 +53,24 @@ def callback():
 
 # INPUT
 
-@app.route('/tweetnets/<tweetnet>', methods=['GET', 'POST'])
+@app.route('/tweetnets/<tweetnet>/', methods=['GET', 'POST'])
 def botnet(tweetnet):
 	"""
 	if get, tweetnet info
 	if post, add to tweetnet
 	"""
 	if request.method == 'POST':
-		tweetnet.add_account(account)
+		account = model.Account()
+		account.access_key = session['account'][0]
+		account.access_secret = session['account'][1]
+		q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
+		t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+		t.add_account(account)
 		return render_template('account_added.html')
 	else:
-		return render_template('tweetnet.html')
+		q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
+		tweetnet = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+		return render_template('tweetnet.html', tweetnet=tweetnet)
 
 @app.route('/tweetnets/', methods=['GET', 'POST'])
 def botnets():
@@ -62,14 +79,23 @@ def botnets():
 	if post, create a tweetnet
 	"""
 	if request.method == 'POST':
-		tweetnet = TweetNet(request.form['name'], request.form['account'], request.form['callsign'])
-		return redirect#TODO
+		tweetnet = model.TweetNet(request.form['name'], request.form['account'], request.form['callsign'])
+		tweetnet.save()
+		return redirect('/')
 	else:
 		return render_template('create_tweetnet.html')
 
 @app.route('/')
 def home():
 	return render_template('home.html')
+
+@app.route('/do/')
+def do_tweets():
+	q = query_db('SELECT * FROM tweetnets')
+	for r in q:
+		t = model.TweetNet(r['name'], r['master_account'], r['callsign'])
+		t.do_tweets()
+	return redirect('/')
 
 # RUN CONFIG
 

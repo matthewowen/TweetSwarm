@@ -1,12 +1,31 @@
 from flask import Flask, render_template, session, url_for, g, redirect, request
-import tweepy
-import settings
+import tweepy, settings, sqlite3, httplib2, json, urllib
+
+DATABASE = 'db'
 
 auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
 
 app = Flask(__name__)
 
 app.secret_key = settings.SECRET_KEY
+
+def connect_db():
+    return sqlite3.connect(DATABASE)
+
+def query_db(query, args=(), one=False):
+    cur = g.db.execute(query, args)
+    rv = [dict((cur.description[idx][0], value)
+               for idx, value in enumerate(row)) for row in cur.fetchall()]
+    return (rv[0] if rv else None) if one else rv
+
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+@app.teardown_request
+def teardown_request(exception):
+    if hasattr(g, 'db'):
+        g.db.close()
 
 class TweetNet(object):
 	"""
@@ -15,7 +34,25 @@ class TweetNet(object):
 	the master account can make the slave accounts retweet something by using a callsign in a tweet
 	"""
 
+	def save(self):
+		query_db('INSERT INTO tweetnets VALUES(?,?,?);', [self.name, self.master, self.callsign])
+		g.db.commit()
+
+	def do_tweets(self):
+		http = httplib2.Http()
+		url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote(self.callsign), urllib.quote(self.master))
+		resp, content = http.request(url, "GET")
+		d = json.loads(content)
+		for j in d['results']:
+			self.tweet_out(j['id_str'])
+
 	def tweet_out(self, tweet):
+		for i in query_db('SELECT account_id FROM tweetnetaccount WHERE tweetnet=?', [self.name]):
+			k = query_db('SELECT * from accounts where access_token=?', [i['account_id']], one=True)
+			s = Account()
+			s.access_key = k['access_token']
+			s.access_secret = k['access_secret']
+			self.slaves.append(s)
 		for slave in self.slaves:
 			slave.tweet(tweet)
 		return True
@@ -23,6 +60,9 @@ class TweetNet(object):
 	def add_account(self, account):
 		try:
 			self.slaves.append(account)
+			account.save()
+			query_db('INSERT INTO tweetnetaccount VALUES(?,?);', [account.access_key, self.name])
+			g.db.commit()
 			return True
 		except:
 			return False
@@ -38,13 +78,17 @@ class Account(object):
 	a twitter account
 	"""
 
+	def save(self):
+		query_db('INSERT INTO accounts VALUES(?,?);', [self.access_key, self.access_secret])
+		g.db.commit()
+
 	def tweet(self, tweet):
 		#set up the access credentials
 		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
 		auth.set_access_token(self.access_key, self.access_secret)
 
 		#now do the tweet
-		api = tweepyAPI(auth)
+		api = tweepy.API(auth)
 		api.retweet(tweet)
 
 		return True
@@ -63,6 +107,10 @@ class Account(object):
 
 		self.access_key = auth.access_token.key
 		self.access_secret = auth.access_token.secret
+
+		session['account'] = [self.access_key, self.access_secret]
+
+		self.save
 
 		return render_template('authorised.html')
 
