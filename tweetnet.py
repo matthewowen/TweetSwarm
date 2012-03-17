@@ -57,37 +57,62 @@ def callback():
 def botnet(tweetnet):
 	"""
 	if get, tweetnet info
-	if post, add to tweetnet
+	if post, add account to tweetnet
 	"""
+	q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
+	t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+
 	if request.method == 'POST':
-		account = model.Account()
-		account.access_key = session['account'][0]
-		account.access_secret = session['account'][1]
-		q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
-		t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
-		t.add_account(account)
-		return render_template('account_added.html')
+		try:
+			t.add_account()
+			return render_template('tweetnet.html', tweetnet=t, joined=True, token=session['account'][0], message='Your Twitter account was successfully added to this TweetNet')
+		except KeyError:
+			session['tweetnet'] = tweetnet
+			return redirect('/auth/')
 	else:
-		q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
-		tweetnet = model.TweetNet(q['name'], q['master_account'], q['callsign'])
-		return render_template('tweetnet.html', tweetnet=tweetnet)
+		try:
+			if query_db('SELECT * FROM tweetnetaccount WHERE (account_id=? AND tweetnet=?);', [session['account'][0], tweetnet]):
+				return render_template('tweetnet.html', tweetnet=t, joined=True, token=session['account'][0])
+			else:
+				pass
+		except KeyError:
+			pass
+		return render_template('tweetnet.html', tweetnet=t)
+
+@app.route('/tweetnets/<tweetnet>/<access_key>/', methods=['POST'])
+def botnet_account(tweetnet, access_key):
+	q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
+	t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+
+	r = t.remove_account(access_key)
+
+	if r:
+		return render_template('tweetnet.html', tweetnet=t, message='Your Twitter account has been removed from this TweetNet')
+	else:
+		return render_template('tweetnet.html', tweetnet=t, error='Something went wrong with removing your Twitter account from this TweetNet')
 
 @app.route('/tweetnets/', methods=['GET', 'POST'])
 def botnets():
 	"""
-	if get, tweetnet creation page
+	if get, tweetnet listing page
 	if post, create a tweetnet
 	"""
 	if request.method == 'POST':
 		tweetnet = model.TweetNet(request.form['name'], request.form['account'], request.form['callsign'])
 		tweetnet.save()
-		return redirect('/')
+		return redirect('/tweetnets/')
 	else:
-		return render_template('create_tweetnet.html')
+		tweetnets = query_db('SELECT * FROM tweetnets;')
+		tweetnets.reverse()
+		return render_template('tweetnets.html', tweetnets=tweetnets)
 
 @app.route('/')
 def home():
 	return render_template('home.html')
+
+@app.route('/about/')
+def about():
+	return render_template('about.html')
 
 @app.route('/do/')
 def do_tweets():

@@ -1,11 +1,32 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h2>{{ tweetnet.name }}</h2>
-<h3>{{ tweetnet.master }}</h3>
-<h3>{{ tweetnet.callsign }}</h3>
-
-<form action="/tweetnets/{{ tweetnet.name }}/" method="post">
-	<input type="submit" value="Submit!">
+{% if message %}
+<div class="alert alert-success span6">
+	<p>{{ message }}</p>
+</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error span6">
+	<p>{{ error }}</p>
+</div>
+{% endif %}
+<h2 class="span6">{{ tweetnet.name }}</h2>
+<dl class="span6">
+	<dt><h4>Watching account:</h4></dt>
+	<dd><h4>{{ tweetnet.master }}</h4></dd>
+	<dt><h4>Watching hashtag</h4></dt>
+	<dd><h4>#{{ tweetnet.callsign }}</h4></dd>
+</dl>
+{% if not joined %}
+<form action="/tweetnets/{{ tweetnet.name }}/" method="post" class="span6">
+	<label for="submit">Please think carefully before joining a TweetNet. For now, there's no way to leave once you've joined. Which means that for perpetuity, you WILL retweet anything meeting the above criteria.</label>
+	<button type="submit" class="btn" id="submit">Join this tweetnet</button>
 </form>
+{% else %}
+<form action="/tweetnets/{{ tweetnet.name }}/{{ token }}/" method="post" class="span6">
+<label for="submit">You've already joined this tweetnet. Click the button to leave it.</label>
+<button type="submit" class="btn" id="submit">Leave this tweetnet</button>
+</form>
+{% endif %}
 {% endblock %}

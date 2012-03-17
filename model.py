@@ -57,14 +57,24 @@ class TweetNet(object):
 			slave.tweet(tweet)
 		return True
 
-	def add_account(self, account):
-		try:
-			self.slaves.append(account)
-			account.save()
-			query_db('INSERT INTO tweetnetaccount VALUES(?,?);', [account.access_key, self.name])
+	def add_account(self):
+		account = Account()
+		account.access_key = session['account'][0]
+		account.access_secret = session['account'][1]
+		self.slaves.append(account)
+		account.save()
+		query_db('INSERT INTO tweetnetaccount VALUES(?,?);', [account.access_key, self.name])
+		g.db.commit()
+		return True
+
+	def remove_account(self, access_key):
+		account = Account()
+		account.access_key = session['account'][0]
+		if account.access_key == access_key:
+			query_db('DELETE FROM tweetnetaccount WHERE (account_id=? AND tweetnet=?);', [account.access_key, self.name])
 			g.db.commit()
 			return True
-		except:
+		else:
 			return False
 
 	def __init__(self, name, account, callsign):
@@ -79,8 +89,12 @@ class Account(object):
 	"""
 
 	def save(self):
-		query_db('INSERT INTO accounts VALUES(?,?);', [self.access_key, self.access_secret])
-		g.db.commit()
+		try:
+			query_db('INSERT INTO accounts VALUES(?,?);', [self.access_key, self.access_secret])
+			g.db.commit()
+			return True
+		except sqlite3.IntegrityError:
+			return False
 
 	def tweet(self, tweet):
 		#set up the access credentials
@@ -111,6 +125,12 @@ class Account(object):
 		session['account'] = [self.access_key, self.access_secret]
 
 		self.save
+
+		if session['tweetnet']:
+			q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [session['tweetnet']], one=True)
+			t = TweetNet(q['name'], q['master_account'], q['callsign'])
+			t.add_account()
+			return redirect('/tweetnets/%s' % (session['tweetnet']))
 
 		return render_template('authorised.html')
 

@@ -1,29 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="/static/styles.css" type="text/css" />
-<link rel="shortcut icon" href="/static/favicon.ico" />
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="shortcut icon" href="/static/favicon.ico" />
+	<link href="/static/styles.css" rel="stylesheet">
 {% block head %}
 <title>TweetBotNet</title>
 {% endblock %}
 </head>
 <body>
-<header id="h">
 {% block header %}
-<h1><a href="/">TweetBotNet</a></h1>
-{% endblock %}
+<header id="h" class="navbar navbar-fixed-top">
+	<nav class="navbar-inner">
+		<div class="container">
+			<h1><a href="/" class="brand">TweetNet</a></h1>
+			<ul class="nav">
+				<li><a href="/tweetnets/">View TweetNets</a></li>
+				<li><a href="/about/">About TweetNet</a></li>
+		</div>
+	</nav>
 </header>
-<article>
+<div class="container">
+{% endblock %}
+<article class="span7">
 
 {% block body %}
 
 {% endblock %}
 
 </article>
-<footer id="f">
+
+<aside class="span4">
+	{% block sidebar %}
+	<form action="/tweetnets/" method="post">
+		<h3>Create a TweetNet</h3>
+		<label for="name">Tweetnet name</label>
+		<input name="name" id="name">
+		<label for="account">Account to retweet</label>
+		<input name="account" id="account">
+		<label for="callsign">Callsign to watch for</label>
+				<div class="input-prepend">
+					<span class="add-on">#</span>
+					<input name="callsign" id="callsign" type="text">
+				</div>
+		<button type="submit" class="btn">Create TweetNet</button>
+	</form>
+	{% endblock %}
+</aside>
+<footer class="navbar navbar-fixed-bottom">
+	<div class="navbar-inner">
+		<div class="container">
+			<ul class="nav">
+				<li><a href="http://www.matthew-owen.com">Made by Matthew Owen</a></li>
+			</ul>
+		</div>
+	</div>
 </footer>
 {% block script %}
 
 {% endblock %}
+</div>
 </body>
 </html>
