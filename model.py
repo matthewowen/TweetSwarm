@@ -40,7 +40,7 @@ class TweetNet(object):
 
 	def do_tweets(self):
 		http = httplib2.Http()
-		url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote(self.callsign), urllib.quote(self.master))
+		url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
 		resp, content = http.request(url, "GET")
 		d = json.loads(content)
 		for j in d['results']:
