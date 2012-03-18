@@ -59,8 +59,8 @@ def botnet(tweetswarm):
 	if get, tweetswarm info
 	if post, add account to tweetswarm
 	"""
-	q = query_db('SELECT * FROM tweetswarm WHERE (name=?);', [tweetswarm], one=True)
-	t = model.TweetSwarm(q['name'], q['master_account'], q['callsign'])
+	q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [tweetswarm], one=True)
+	t = model.TweetSwarm(q['name'], q['master'], q['callsign'])
 
 	if request.method == 'POST':
 		try:
@@ -82,7 +82,7 @@ def botnet(tweetswarm):
 @app.route('/tweetswarms/<tweetswarm>/<access_key>/', methods=['POST'])
 def botnet_account(tweetswarm, access_key):
 	q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [tweetswarm], one=True)
-	t = model.tweetswarm(q['name'], q['master_account'], q['callsign'])
+	t = model.TweetSwarm(q['name'], q['master'], q['callsign'])
 
 	r = t.remove_account(access_key)
 
@@ -98,9 +98,15 @@ def botnets():
 	if post, create a tweetswarm
 	"""
 	if request.method == 'POST':
-		tweetswarm = model.tweetswarm(request.form['name'], request.form['account'], request.form['callsign'])
-		tweetswarm.save()
-		return redirect('/tweetswarms/')
+		tweetswarm = model.TweetSwarm(request.form['name'], request.form['account'], request.form['callsign'])
+		if tweetswarm.validate():
+			tweetswarm.save()
+			return redirect('/tweetswarms/')
+		else:
+			tweetswarms = query_db('SELECT * FROM tweetswarms;')
+			tweetswarms.reverse()
+			return render_template('tweetswarms.html', tweetswarms=tweetswarms, error='Please enter a single word of up to thirty characters for each field')
+
 	else:
 		tweetswarms = query_db('SELECT * FROM tweetswarms;')
 		tweetswarms.reverse()
@@ -118,7 +124,7 @@ def about():
 def do_tweets():
 	q = query_db('SELECT * FROM tweetswarms')
 	for r in q:
-		t = model.tweetswarm(r['name'], r['master_account'], r['callsign'])
+		t = model.TweetSwarm(r['name'], r['master'], r['callsign'])
 		t.do_tweets()
 	return redirect('/')
 

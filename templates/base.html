@@ -2,9 +2,9 @@
 <html>
 <head>
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
-	<link rel="shortcut icon" href="/static/favicon.ico" />
+	<!--<link rel="shortcut icon" href="/static/favicon.ico" />-->
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-	<!--<script src="/static/bootstrap/js/bootstrap.js" type="text/javascript"></script>-->
+	<script src="/static/bootstrap/js/bootstrap.js" type="text/javascript"></script>
 	<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.js" type="text/javascript"></script>
 	<link href="/static/styles.css" rel="stylesheet">
 	<script type="text/javascript">
@@ -12,13 +12,33 @@
 	window.onload = (function(){
 		try{
 			$(document).ready(function(){
-				$("#sidebarForm").validate();
+				$.validator.addMethod(
+					"nospace", 
+					function(value, element) {
+						return this.optional(element) || (value.indexOf(' ') == -1)
+				},
+				$.format("Please enter a single word")
+				);
+				$("#sidebarForm").validate(
+					{
+						errorLabelContainer: $("#RegisterErrors"),
+						rules: {
+							name: { required: true, maxlength: 30, nospace: true},
+							account: { required: true, maxlength: 30, nospace: true},
+							callsign: {required: true, maxlength: 30, nospace: true}
+						},
+						messages: {
+							name: "Please give your TweetSwarm a one word name, up to thirty characters",
+							account: "Please specify an account for your TweetSwarm to follow",
+							callsign: "Please specify a hashtag for your TweetSwarm to follow"
+						}
+					});
 			});
 		}catch(e){}});
 	-->
 	</script>
 {% block head %}
-<title>TweetBotNet</title>
+<title>TweetSwarm</title>
 {% endblock %}
 </head>
 <body>
@@ -48,13 +68,14 @@
 	{% block sidebar %}
 	<form id="sidebarForm" class="form-horizontal" action="/tweetswarms/" method="post">
 		<h3>Create a TweetSwarm</h3>
+		<div id="RegisterErrors" class="alert alert-error" style="display:none"></div>
 		<label for="name">Tweetnet name</label>
-		<input name="name" id="name" class="required" minlength="1" type="text">
+		<input name="name" id="name" minlength="1" type="text">
 		<label for="account">Account to retweet</label>
-		<input name="account" id="account" class="required" minlength="1" type="text">
+		<input name="account" id="account" minlength="1" type="text">
 		<label for="callsign">Callsign to watch for</label>
 		<div class="input-prepend">
-			<span class="add-on">#</span><input name="callsign" id="callsign" type="text" size="8" class="required" minlength="1">
+			<span class="add-on">#</span><input name="callsign" id="callsign" type="text" size="8">
 		</div>
 		<button type="submit" class="btn sbtn">Create TweetSwarm</button>
 	</form>

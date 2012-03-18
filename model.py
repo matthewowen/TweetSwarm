@@ -27,12 +27,22 @@ def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
 
+def tweetswarm_string_validate(s):
+	"""
+	validates whether a string is of an acceptable format for the TweetSwarm
+	"""
+	return s.__len__() < 31 and s.__len__() > 0 and not ' ' in s
+
 class TweetSwarm(object):
 	"""
 	a TweetSwarm has a master account
 	it also has a number of slave accounts
 	the master account can make the slave accounts retweet something by using a callsign in a tweet
 	"""
+
+	def validate(self):
+		return tweetswarm_string_validate(self.name) and tweetswarm_string_validate(self.master) and tweetswarm_string_validate(self.callsign)
+
 
 	def save(self):
 		"""
@@ -93,9 +103,9 @@ class TweetSwarm(object):
 		else:
 			return False
 
-	def __init__(self, name, account, callsign):
+	def __init__(self, name, master, callsign):
 		self.name = name
-		self.master = account
+		self.master = master
 		self.callsign = callsign
 		self.slaves = []
 
@@ -150,7 +160,7 @@ class Account(object):
 
 		if session['tweetswarm']:
 			q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [session['tweetswarm']], one=True)
-			t = TweetSwarm(q['name'], q['master_account'], q['callsign'])
+			t = TweetSwarm(q['name'], q['master'], q['callsign'])
 			t.add_account()
 			return redirect('/tweetswarms/%s' % (session['tweetswarm']))
 

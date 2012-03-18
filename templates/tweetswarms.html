@@ -8,7 +8,7 @@
 	<div class="well">
 		<a href="/tweetswarms/{{ tweetswarm.name }}/">
 			<h3>{{ tweetswarm.name }}</h3>
-			<h4>{{ tweetswarm.master_account }}</h4>
+			<h4>{{ tweetswarm.master }}</h4>
 			<h4>{{ tweetswarm.callsign }}</h4>
 		</a>
 	</div>
@@ -16,3 +16,23 @@
 	{% endfor %}
 </form>
 {% endblock %}
+
+{% block sidebar %}
+	<form id="sidebarForm" class="form-horizontal" action="/tweetswarms/" method="post">
+		<h3>Create a TweetSwarm</h3>
+		{% if error %}
+		<div class="alert alert-error">
+			<p>{{ error }}</p>
+		</div>
+		{% endif %}
+		<label for="name">Tweetnet name</label>
+		<input name="name" id="name" class="required" minlength="1" type="text">
+		<label for="account">Account to retweet</label>
+		<input name="account" id="account" class="required" minlength="1" type="text">
+		<label for="callsign">Callsign to watch for</label>
+		<div class="input-prepend">
+			<span class="add-on">#</span><input name="callsign" id="callsign" type="text" size="8" class="required" minlength="1">
+		</div>
+		<button type="submit" class="btn sbtn">Create TweetSwarm</button>
+	</form>
+	{% endblock %}

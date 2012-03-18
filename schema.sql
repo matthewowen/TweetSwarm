@@ -4,9 +4,9 @@ CREATE TABLE accounts(
 );
 
 CREATE TABLE tweetswarms(
-	name varchar(255) primary key not null,
-	master_account varchar(255) not null,
-	callsign varchar(255) not null
+	name varchar(30) primary key not null,
+	master varchar(30) not null,
+	callsign varchar(30) not null
 );
 
 CREATE TABLE tweetswarmaccount(
