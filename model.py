@@ -35,10 +35,16 @@ class TweetNet(object):
 	"""
 
 	def save(self):
+		"""
+		save object into DB
+		"""
 		query_db('INSERT INTO tweetnets VALUES(?,?,?);', [self.name, self.master, self.callsign])
 		g.db.commit()
 
 	def do_tweets(self):
+		"""
+		searches for matching tweets, calls the tweet function for each one
+		"""
 		http = httplib2.Http()
 		url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
 		resp, content = http.request(url, "GET")
@@ -47,6 +53,9 @@ class TweetNet(object):
 			self.tweet_out(j['id_str'])
 
 	def tweet_out(self, tweet):
+		"""
+		for the given tweet, calls the account retweet function for every slave account
+		"""
 		for i in query_db('SELECT account_id FROM tweetnetaccount WHERE tweetnet=?', [self.name]):
 			k = query_db('SELECT * from accounts where access_token=?', [i['account_id']], one=True)
 			s = Account()
@@ -58,6 +67,9 @@ class TweetNet(object):
 		return True
 
 	def add_account(self):
+		"""
+		adds the twitter account belonging to the current user's session
+		"""
 		account = Account()
 		account.access_key = session['account'][0]
 		account.access_secret = session['account'][1]
@@ -68,6 +80,10 @@ class TweetNet(object):
 		return True
 
 	def remove_account(self, access_key):
+		"""
+		removes a twitter account. requires the passing of an access_key.
+		the passed access_key must match the current sessions's access_key
+		"""
 		account = Account()
 		account.access_key = session['account'][0]
 		if account.access_key == access_key:
@@ -89,6 +105,9 @@ class Account(object):
 	"""
 
 	def save(self):
+		"""
+		saves object into DB
+		"""
 		try:
 			query_db('INSERT INTO accounts VALUES(?,?);', [self.access_key, self.access_secret])
 			g.db.commit()
@@ -97,6 +116,9 @@ class Account(object):
 			return False
 
 	def tweet(self, tweet):
+		"""
+		retweets the supplied tweet
+		"""
 		#set up the access credentials
 		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
 		auth.set_access_token(self.access_key, self.access_secret)
