@@ -26,10 +26,10 @@
 <header id="h" class="navbar navbar-fixed-top">
 	<nav class="navbar-inner">
 		<div class="container">
-			<h1><a href="/" class="brand">TweetNet</a></h1>
+			<h1><a href="/" class="brand">TweetSwarm</a></h1>
 			<ul class="nav">
-				<li><a href="/tweetnets/">View TweetNets</a></li>
-				<li><a href="/about/">About TweetNet</a></li>
+				<li><a href="/tweetswarms/">View TweetSwarms</a></li>
+				<li><a href="/about/">About TweetSwarm</a></li>
 		</div>
 	</nav>
 </header>
@@ -46,8 +46,8 @@
 
 <aside class="span4">
 	{% block sidebar %}
-	<form id="sidebarForm" class="form-horizontal" action="/tweetnets/" method="post">
-		<h3>Create a TweetNet</h3>
+	<form id="sidebarForm" class="form-horizontal" action="/tweetswarms/" method="post">
+		<h3>Create a TweetSwarm</h3>
 		<label for="name">Tweetnet name</label>
 		<input name="name" id="name" class="required" minlength="1" type="text">
 		<label for="account">Account to retweet</label>
@@ -56,7 +56,7 @@
 		<div class="input-prepend">
 			<span class="add-on">#</span><input name="callsign" id="callsign" type="text" size="8" class="required" minlength="1">
 		</div>
-		<button type="submit" class="btn sbtn">Create TweetNet</button>
+		<button type="submit" class="btn sbtn">Create TweetSwarm</button>
 	</form>
 	{% endblock %}
 </aside>

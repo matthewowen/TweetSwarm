@@ -53,58 +53,58 @@ def callback():
 
 # INPUT
 
-@app.route('/tweetnets/<tweetnet>/', methods=['GET', 'POST'])
-def botnet(tweetnet):
+@app.route('/tweetswarms/<tweetswarm>/', methods=['GET', 'POST'])
+def botnet(tweetswarm):
 	"""
-	if get, tweetnet info
-	if post, add account to tweetnet
+	if get, tweetswarm info
+	if post, add account to tweetswarm
 	"""
-	q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
-	t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+	q = query_db('SELECT * FROM tweetswarm WHERE (name=?);', [tweetswarm], one=True)
+	t = model.TweetSwarm(q['name'], q['master_account'], q['callsign'])
 
 	if request.method == 'POST':
 		try:
 			t.add_account()
-			return render_template('tweetnet.html', tweetnet=t, joined=True, token=session['account'][0], message='Your Twitter account was successfully added to this TweetNet')
+			return render_template('tweetswarm.html', tweetswam=t, joined=True, token=session['account'][0], message='Your Twitter account was successfully added to this TweetSwarm')
 		except KeyError:
-			session['tweetnet'] = tweetnet
+			session['tweetswarm'] = tweetswarm
 			return redirect('/auth/')
 	else:
 		try:
-			if query_db('SELECT * FROM tweetnetaccount WHERE (account_id=? AND tweetnet=?);', [session['account'][0], tweetnet]):
-				return render_template('tweetnet.html', tweetnet=t, joined=True, token=session['account'][0])
+			if query_db('SELECT * FROM tweetswarmaccount WHERE (account_id=? AND tweetswarm=?);', [session['account'][0], tweetswarm]):
+				return render_template('tweetswarm.html', tweetswarm=t, joined=True, token=session['account'][0])
 			else:
 				pass
 		except KeyError:
 			pass
-		return render_template('tweetnet.html', tweetnet=t)
+		return render_template('tweetswarm.html', tweetswarm=t)
 
-@app.route('/tweetnets/<tweetnet>/<access_key>/', methods=['POST'])
-def botnet_account(tweetnet, access_key):
-	q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [tweetnet], one=True)
-	t = model.TweetNet(q['name'], q['master_account'], q['callsign'])
+@app.route('/tweetswarms/<tweetswarm>/<access_key>/', methods=['POST'])
+def botnet_account(tweetswarm, access_key):
+	q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [tweetswarm], one=True)
+	t = model.tweetswarm(q['name'], q['master_account'], q['callsign'])
 
 	r = t.remove_account(access_key)
 
 	if r:
-		return render_template('tweetnet.html', tweetnet=t, message='Your Twitter account has been removed from this TweetNet')
+		return render_template('tweetswarm.html', tweetswarm=t, message='Your Twitter account has been removed from this tweetswarm')
 	else:
-		return render_template('tweetnet.html', tweetnet=t, error='Something went wrong with removing your Twitter account from this TweetNet')
+		return render_template('tweetswarm.html', tweetswarm=t, error='Something went wrong with removing your Twitter account from this tweetswarm')
 
-@app.route('/tweetnets/', methods=['GET', 'POST'])
+@app.route('/tweetswarms/', methods=['GET', 'POST'])
 def botnets():
 	"""
-	if get, tweetnet listing page
-	if post, create a tweetnet
+	if get, tweetswarm listing page
+	if post, create a tweetswarm
 	"""
 	if request.method == 'POST':
-		tweetnet = model.TweetNet(request.form['name'], request.form['account'], request.form['callsign'])
-		tweetnet.save()
-		return redirect('/tweetnets/')
+		tweetswarm = model.tweetswarm(request.form['name'], request.form['account'], request.form['callsign'])
+		tweetswarm.save()
+		return redirect('/tweetswarms/')
 	else:
-		tweetnets = query_db('SELECT * FROM tweetnets;')
-		tweetnets.reverse()
-		return render_template('tweetnets.html', tweetnets=tweetnets)
+		tweetswarms = query_db('SELECT * FROM tweetswarms;')
+		tweetswarms.reverse()
+		return render_template('tweetswarms.html', tweetswarms=tweetswarms)
 
 @app.route('/')
 def home():
@@ -116,9 +116,9 @@ def about():
 
 @app.route('/do/')
 def do_tweets():
-	q = query_db('SELECT * FROM tweetnets')
+	q = query_db('SELECT * FROM tweetswarms')
 	for r in q:
-		t = model.TweetNet(r['name'], r['master_account'], r['callsign'])
+		t = model.tweetswarm(r['name'], r['master_account'], r['callsign'])
 		t.do_tweets()
 	return redirect('/')
 

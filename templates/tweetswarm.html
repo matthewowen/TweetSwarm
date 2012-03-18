@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% if message %}
+<div class="alert alert-success">
+	<p>{{ message }}</p>
+</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error">
+	<p>{{ error }}</p>
+</div>
+{% endif %}
+<h2>{{ tweetswarm.name }}</h2>
+<dl>
+	<dt><h4>Watching account:</h4></dt>
+	<dd><h4>{{ tweetswarm.master }}</h4></dd>
+	<dt><h4>Watching hashtag</h4></dt>
+	<dd><h4>#{{ tweetswarm.callsign }}</h4></dd>
+</dl>
+{% if not joined %}
+<form action="/tweetswarms/{{ tweetswarm.name }}/" method="post">
+	<label for="submit">Click the button to join this tweetswarm and automatically retweet any Tweets meeting the above criteria.</label>
+	<button type="submit" class="btn" id="submit">Join this TweetSwarm</button>
+</form>
+{% else %}
+<form action="/tweetswarms/{{ tweetswarm.name }}/{{ token }}/" method="post">
+<label for="submit">You're part of this tweetswarm. Click the button to leave it.</label>
+<button type="submit" class="btn" id="submit">Leave this TweetSwarm</button>
+</form>
+{% endif %}
+{% endblock %}

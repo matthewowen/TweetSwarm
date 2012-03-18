@@ -27,9 +27,9 @@ def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
 
-class TweetNet(object):
+class TweetSwarm(object):
 	"""
-	a TweetNet has a master account
+	a TweetSwarm has a master account
 	it also has a number of slave accounts
 	the master account can make the slave accounts retweet something by using a callsign in a tweet
 	"""
@@ -38,7 +38,7 @@ class TweetNet(object):
 		"""
 		save object into DB
 		"""
-		query_db('INSERT INTO tweetnets VALUES(?,?,?);', [self.name, self.master, self.callsign])
+		query_db('INSERT INTO tweetswarms VALUES(?,?,?);', [self.name, self.master, self.callsign])
 		g.db.commit()
 
 	def do_tweets(self):
@@ -56,7 +56,7 @@ class TweetNet(object):
 		"""
 		for the given tweet, calls the account retweet function for every slave account
 		"""
-		for i in query_db('SELECT account_id FROM tweetnetaccount WHERE tweetnet=?', [self.name]):
+		for i in query_db('SELECT account_id FROM tweetswarmaccount WHERE tweetswarm=?', [self.name]):
 			k = query_db('SELECT * from accounts where access_token=?', [i['account_id']], one=True)
 			s = Account()
 			s.access_key = k['access_token']
@@ -75,7 +75,7 @@ class TweetNet(object):
 		account.access_secret = session['account'][1]
 		self.slaves.append(account)
 		account.save()
-		query_db('INSERT INTO tweetnetaccount VALUES(?,?);', [account.access_key, self.name])
+		query_db('INSERT INTO tweetswarmaccount VALUES(?,?);', [account.access_key, self.name])
 		g.db.commit()
 		return True
 
@@ -87,7 +87,7 @@ class TweetNet(object):
 		account = Account()
 		account.access_key = session['account'][0]
 		if account.access_key == access_key:
-			query_db('DELETE FROM tweetnetaccount WHERE (account_id=? AND tweetnet=?);', [account.access_key, self.name])
+			query_db('DELETE FROM tweetswarmaccount WHERE (account_id=? AND tweetswarm=?);', [account.access_key, self.name])
 			g.db.commit()
 			return True
 		else:
@@ -148,11 +148,11 @@ class Account(object):
 
 		self.save
 
-		if session['tweetnet']:
-			q = query_db('SELECT * FROM tweetnets WHERE (name=?);', [session['tweetnet']], one=True)
-			t = TweetNet(q['name'], q['master_account'], q['callsign'])
+		if session['tweetswarm']:
+			q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [session['tweetswarm']], one=True)
+			t = TweetSwarm(q['name'], q['master_account'], q['callsign'])
 			t.add_account()
-			return redirect('/tweetnets/%s' % (session['tweetnet']))
+			return redirect('/tweetswarms/%s' % (session['tweetswarm']))
 
 		return render_template('authorised.html')
 
