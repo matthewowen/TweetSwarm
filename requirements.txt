@@ -1,0 +1,6 @@
+Flask==0.8
+Jinja2==2.6
+Werkzeug==0.8.3
+httplib2==0.7.4
+tweepy==1.9
+wsgiref==0.1.2
