@@ -65,7 +65,7 @@ def botnet(tweetswarm):
 	if request.method == 'POST':
 		try:
 			t.add_account()
-			return render_template('tweetswarm.html', tweetswam=t, joined=True, token=session['account'][0], message='Your Twitter account was successfully added to this TweetSwarm')
+			return render_template('tweetswarm.html', tweetswarm=t, joined=True, token=session['account'][0], message='Your Twitter account was successfully added to this TweetSwarm')
 		except KeyError:
 			session['tweetswarm'] = tweetswarm
 			return redirect('/auth/')

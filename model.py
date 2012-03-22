@@ -130,12 +130,18 @@ class Account(object):
 		retweets the supplied tweet
 		"""
 		#set up the access credentials
-		auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
-		auth.set_access_token(self.access_key, self.access_secret)
+		try:
+			auth = tweepy.OAuthHandler(settings.CONSUMER_TOKEN, settings.CONSUMER_SECRET)
+			auth.set_access_token(self.access_key, self.access_secret)
+		except tweepy.error.TweepError:
+			return False
 
 		#now do the tweet
-		api = tweepy.API(auth)
-		api.retweet(tweet)
+		try:
+			api = tweepy.API(auth)
+			api.retweet(tweet)
+		except tweepy.error.TweepError:
+			return False
 
 		return True
 
