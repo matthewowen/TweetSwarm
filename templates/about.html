@@ -3,14 +3,17 @@
 {% block body %}
 <h2>About TweetSwarm</h2>
 <h3>What is it?</h3>
-<p>TweetSwarm is a tool to bring Twitter acccounts together into drone networks</p>
+<p>TweetSwarm is a tool to create auto-retweeting networks of Twitter accounts</p>
 <p>Create a TweetSwarm, specifying a user and hashtag to follow. Add Twitter accounts to the TweetSwarm. Then, whenever the specified user tweets using the specified hashtag, all of the added Twitter accounts will automatically retweet it.</p>
-<p>You might have a legitimate purpose for this. I hope so. Please don't use this for something you shouldn't.</p>
-<h3>Why?</h3>
-<p>An offhand comment made at work gave me the idea. I thought it'd be a fun exercise. It might actually be useful to someone</p>
-<p>But really, mostly just because I thought it'd be fun</p>
+<h3>What could I do with it?</h3>
+<dl>
+	<dt>Create a Twitter 'botnet'</dt>
+	<dd>Create a TweetSwarm following a master Twitter account. Join slave accounts to it. Instantly retweet whatever's tweeted.</dd>
+	<dt>Set up an aggregating Twitter bot</dt>
+	<dd>Set up TweetSwarms for all the user/hastag combos you want to follow. Join them all with a single account. You'll draw all those tweets together with one</dd>
+</dl>
 <h3>What's it made with?</h3>
-<p>Python, Flask, Tweepy, Twitter Bootstrap, other things I may have forgotten.</p>
+<p>Python, Flask, Tweepy, Twitter Bootstrap, etc.</p>
 <h3>Who are you?</h3>
 <p>Matthew Owen</p>
 <ul>
@@ -21,4 +24,5 @@
 <h3>Legal Stuff?</h3>
 <p>I offer no warranties, guarantees, assurances or promises whatsoever about any aspect of this website.</p>
 <p>The only personal data the website stores about you is a Twitter access token and a Twitter secret token. This information is specific to this particular site, and you can rescind it at any time through Twitter.</p>
+<p>Obviously, this isn't endorsed/approved/whatever by Twitter</p>
 {% endblock %}

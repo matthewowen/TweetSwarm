@@ -41,8 +41,10 @@ class TweetSwarm(object):
 	"""
 
 	def validate(self):
-		return tweetswarm_string_validate(self.name) and tweetswarm_string_validate(self.master) and tweetswarm_string_validate(self.callsign)
-
+		if self.callsign:
+			return tweetswarm_string_validate(self.name) and tweetswarm_string_validate(self.master) and tweetswarm_string_validate(self.callsign)
+		else:
+			return tweetswarm_string_validate(self.name) and tweetswarm_string_validate(self.master)
 
 	def save(self):
 		"""
@@ -56,7 +58,10 @@ class TweetSwarm(object):
 		searches for matching tweets, calls the tweet function for each one
 		"""
 		http = httplib2.Http()
-		url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
+		if self.callsign:
+			url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
+		else:
+			url = "http://search.twitter.com/search.json?from:%s" % (urllib.quote(self.master))
 		resp, content = http.request(url, "GET")
 		d = json.loads(content)
 		for j in d['results']:

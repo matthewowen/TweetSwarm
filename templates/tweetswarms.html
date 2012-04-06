@@ -7,9 +7,9 @@
 	<li>
 	<div class="well">
 		<a href="/tweetswarms/{{ tweetswarm.name }}/">
-			<h3>{{ tweetswarm.name }}</h3>
-			<h4>{{ tweetswarm.master }}</h4>
-			<h4>{{ tweetswarm.callsign }}</h4>
+			<h3>Name: {{ tweetswarm.name }}</h3>
+			<h4>Following account: {{ tweetswarm.master }}</h4>
+			<h4>Following hashtag: #{{ tweetswarm.callsign }}</h4>
 		</a>
 	</div>
 	</li>
@@ -25,7 +25,7 @@
 			<p>{{ error }}</p>
 		</div>
 		{% endif %}
-		<label for="name">Tweetnet name</label>
+		<label for="name">TweetSwarm name</label>
 		<input name="name" id="name" class="required" minlength="1" type="text">
 		<label for="account">Account to retweet</label>
 		<input name="account" id="account" class="required" minlength="1" type="text">

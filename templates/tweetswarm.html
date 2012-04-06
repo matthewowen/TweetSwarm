@@ -12,15 +12,18 @@
 </div>
 {% endif %}
 <h2>{{ tweetswarm.name }}</h2>
+<p>This TweetSwarm retweets tweets meeting the following criteria:
 <dl>
-	<dt><h4>Watching account:</h4></dt>
-	<dd><h4>{{ tweetswarm.master }}</h4></dd>
-	<dt><h4>Watching hashtag</h4></dt>
-	<dd><h4>#{{ tweetswarm.callsign }}</h4></dd>
+	<dt><h4>From account:</h4></dt>
+	<dd><h4><a href="http://twitter.com/{{ tweetswarm.master }}">{{ tweetswarm.master }}</a></h4></dd>
+	{% if tweetswarm.callsign %}
+		<dt><h4>With the hashtag:</h4></dt>
+		<dd><h4>#{{ tweetswarm.callsign }}</h4></dd>
+	{% endif %}
 </dl>
 {% if not joined %}
 <form action="/tweetswarms/{{ tweetswarm.name }}/" method="post">
-	<label for="submit">Click the button to join this tweetswarm and automatically retweet any Tweets meeting the above criteria.</label>
+	<label for="submit">Click the button to join this TweetSwarm and automatically retweet any tweets meeting the above criteria.</label>
 	<button type="submit" class="btn" id="submit">Join this TweetSwarm</button>
 </form>
 {% else %}
