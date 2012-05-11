@@ -50,7 +50,7 @@ class TweetSwarm(object):
         """
         save object into DB
         """
-        query_db('INSERT INTO tweetswarms VALUES(?,?,?);', [self.name, self.master, self.callsign])
+        query_db('INSERT INTO tweetswarms VALUES(?,?,?,?);', [self.name, self.master, self.callsign, ''])
         g.db.commit()
 
     def do_tweets(self):
@@ -75,13 +75,20 @@ class TweetSwarm(object):
                             'FROM accounts ' \
                             'INNER JOIN tweetswarmaccount '\
                             'ON account.access_token=tweetswarmaccount.account_id '\
-                            'WHERE tweetswarmaccount.tweetswarm=?', ([self.name])):
+                            'WHERE tweetswarmaccount.tweetswarm=?', ([self.name])
+                            ):
             s = Account()
             s.access_key = k['access_token']
             s.access_secret = k['access_secret']
             self.slaves.append(s)
         for slave in self.slaves:
             slave.tweet(tweet)
+
+        query_db('UPDATE tweetswarms' \
+                    'SET lasttweeted=?' \
+                    'WHERE name=?' ([tweet, self.name])
+                    )
+        g.db.commit()
         return True
 
     def add_account(self):
