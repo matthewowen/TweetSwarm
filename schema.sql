@@ -6,7 +6,8 @@ CREATE TABLE accounts(
 CREATE TABLE tweetswarms(
 	name varchar(30) primary key not null,
 	master varchar(30) not null,
-	callsign varchar(30)
+	callsign varchar(30),
+    lasttweeted varchar(30)
 );
 
 CREATE TABLE tweetswarmaccount(
