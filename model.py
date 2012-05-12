@@ -61,11 +61,14 @@ class TweetSwarm(object):
         if self.callsign:
             url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
         else:
-            url = "http://search.twitter.com/search.json?from:%s" % (urllib.quote(self.master))
+            url = "http://search.twitter.com/search.json?q=from:%s" % (urllib.quote(self.master))
         resp, content = http.request(url, "GET")
         d = json.loads(content)
         for j in d['results']:
-            self.tweet_out(j['id_str'])
+            if j['id_str'] == self.lasttweeted:
+                return
+            else:
+                self.tweet_out(j['id_str'])
 
     def tweet_out(self, tweet):
         """
@@ -118,10 +121,11 @@ class TweetSwarm(object):
         else:
             return False
 
-    def __init__(self, name, master, callsign):
+    def __init__(self, name, master, callsign, lasttweeted):
         self.name = name
         self.master = master
         self.callsign = callsign
+        self.lasttweeted = lasttweeted
         self.slaves = []
 
 class Account(object):
