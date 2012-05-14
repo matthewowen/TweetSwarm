@@ -4,7 +4,8 @@ CREATE TABLE accounts(
 );
 
 CREATE TABLE tweetswarms(
-	name varchar(30) primary key not null,
+    id INTEGER PRIMARY KEY,
+	name varchar(30) not null,
 	master varchar(30) not null,
 	callsign varchar(30),
     lasttweeted varchar(30)
@@ -12,7 +13,7 @@ CREATE TABLE tweetswarms(
 
 CREATE TABLE tweetswarmaccount(
 	account_id varchar(255),
-	tweetswarm varchar(255),
+	tweetswarm INTEGER,
 	FOREIGN KEY(account_id) REFERENCES accounts(access_token) ON DELETE CASCADE,
-	FOREIGN KEY(tweetswarm) REFERENCES tweetswarms(name) ON DELETE CASCADE
+	FOREIGN KEY(tweetswarm) REFERENCES tweetswarms(id) ON DELETE CASCADE
 );

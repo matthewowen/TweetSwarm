@@ -22,12 +22,12 @@
 	{% endif %}
 </dl>
 {% if not joined %}
-<form action="/tweetswarms/{{ tweetswarm.name }}/" method="post">
+<form action="/tweetswarms/{{ tweetswarm.id }}/" method="post">
 	<label for="submit">Click the button to join this TweetSwarm and automatically retweet any tweets meeting the above criteria.</label>
 	<button type="submit" class="btn" id="submit">Join this TweetSwarm</button>
 </form>
 {% else %}
-<form action="/tweetswarms/{{ tweetswarm.name }}/{{ token }}/" method="post">
+<form action="/tweetswarms/{{ tweetswarm.id }}/{{ token }}/" method="post">
 <label for="submit">You're part of this tweetswarm. Click the button to leave it.</label>
 <button type="submit" class="btn" id="submit">Leave this TweetSwarm</button>
 </form>

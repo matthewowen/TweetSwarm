@@ -6,7 +6,7 @@
 	{% for tweetswarm in tweetswarms %}
 	<li>
 	<div class="well">
-		<a href="/tweetswarms/{{ tweetswarm.name }}/">
+		<a href="/tweetswarms/{{ tweetswarm.id }}/">
 			<h3>Name: {{ tweetswarm.name }}</h3>
 			<h4>Following account: {{ tweetswarm.master }}</h4>
 			<h4>Following hashtag: #{{ tweetswarm.callsign }}</h4>

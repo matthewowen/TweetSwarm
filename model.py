@@ -40,6 +40,22 @@ class TweetSwarm(object):
     the master account can make the slave accounts retweet something by using a callsign in a tweet
     """
 
+    def get_latest_tweet(self):
+        """
+        gets the most recent tweet from the account
+        """
+        http = httplib2.Http()
+        if self.callsign:
+            url = "http://search.twitter.com/search.json?q=%s+from:%s" % (urllib.quote('#' + self.callsign), urllib.quote(self.master))
+        else:
+            url = "http://search.twitter.com/search.json?q=from:%s" % (urllib.quote(self.master))
+        resp, content = http.request(url, "GET")
+        d = json.loads(content)
+        if d['results']:
+            return d['results'][0]['id_str']
+        else:
+            return ''
+
     def validate(self):
         if self.callsign:
             return tweetswarm_string_validate(self.name) and tweetswarm_string_validate(self.master) and tweetswarm_string_validate(self.callsign)
@@ -50,7 +66,10 @@ class TweetSwarm(object):
         """
         save object into DB
         """
-        query_db('INSERT INTO tweetswarms VALUES(?,?,?,?);', [self.name, self.master, self.callsign, ''])
+        # first, set self.lasttweeted to be the most recent tweet, so that we don't retweet old tweets
+        self.lasttweeted = self.get_latest_tweet()
+
+        query_db('INSERT INTO tweetswarms VALUES(null, ?,?,?,?);', [self.name, self.master, self.callsign, self.lasttweeted])
         g.db.commit()
 
     def do_tweets(self):
@@ -78,7 +97,7 @@ class TweetSwarm(object):
                             'FROM accounts ' \
                             'INNER JOIN tweetswarmaccount '\
                             'ON account.access_token=tweetswarmaccount.account_id '\
-                            'WHERE tweetswarmaccount.tweetswarm=?', ([self.name])
+                            'WHERE tweetswarmaccount.tweetswarm=?', ([self.id])
                             ):
             s = Account()
             s.access_key = k['access_token']
@@ -89,7 +108,7 @@ class TweetSwarm(object):
 
         query_db('UPDATE tweetswarms' \
                     'SET lasttweeted=?' \
-                    'WHERE name=?' ([tweet, self.name])
+                    'WHERE id=?' ([tweet, self.id])
                     )
         g.db.commit()
         return True
@@ -103,7 +122,7 @@ class TweetSwarm(object):
         account.access_secret = session['account'][1]
         self.slaves.append(account)
         account.save()
-        query_db('INSERT INTO tweetswarmaccount VALUES(?,?);', [account.access_key, self.name])
+        query_db('INSERT INTO tweetswarmaccount VALUES(?,?);', [account.access_key, self.id])
         g.db.commit()
         return True
 
@@ -115,17 +134,18 @@ class TweetSwarm(object):
         account = Account()
         account.access_key = session['account'][0]
         if account.access_key == access_key:
-            query_db('DELETE FROM tweetswarmaccount WHERE (account_id=? AND tweetswarm=?);', [account.access_key, self.name])
+            query_db('DELETE FROM tweetswarmaccount WHERE (account_id=? AND tweetswarm=?);', [account.access_key, self.id])
             g.db.commit()
             return True
         else:
             return False
 
-    def __init__(self, name, master, callsign, lasttweeted):
+    def __init__(self, name, master, callsign, lasttweeted, ident):
         self.name = name
         self.master = master
         self.callsign = callsign
         self.lasttweeted = lasttweeted
+        self.id = ident
         self.slaves = []
 
 class Account(object):
@@ -184,7 +204,7 @@ class Account(object):
         self.save
 
         if session['tweetswarm']:
-            q = query_db('SELECT * FROM tweetswarms WHERE (name=?);', [session['tweetswarm']], one=True)
+            q = query_db('SELECT * FROM tweetswarms WHERE (id=?);', [session['tweetswarm']], one=True)
             t = TweetSwarm(q['name'], q['master'], q['callsign'])
             t.add_account()
             return redirect('/tweetswarms/%s' % (session['tweetswarm']))
