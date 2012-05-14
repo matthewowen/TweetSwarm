@@ -203,11 +203,13 @@ class Account(object):
 
         self.save
 
+        """
         if session['tweetswarm']:
             q = query_db('SELECT * FROM tweetswarms WHERE (id=?);', [session['tweetswarm']], one=True)
             t = TweetSwarm(q['name'], q['master'], q['callsign'])
             t.add_account()
             return redirect('/tweetswarms/%s' % (session['tweetswarm']))
+        """
 
         return render_template('authorised.html')
 
