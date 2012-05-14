@@ -31,7 +31,7 @@ def tweetswarm_string_validate(s):
     """
     validates whether a string is of an acceptable format for the TweetSwarm
     """
-    return s.__len__() < 31 and s.__len__() > 0 and not ' ' in s
+    return s.__len__() < 140 and s.__len__() > 0
 
 class TweetSwarm(object):
     """
