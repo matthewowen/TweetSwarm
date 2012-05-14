@@ -9,7 +9,9 @@
 		<a href="/tweetswarms/{{ tweetswarm.id }}/">
 			<h3>Name: {{ tweetswarm.name }}</h3>
 			<h4>Following account: {{ tweetswarm.master }}</h4>
+            {% if tweetswarm.callsign %}
 			<h4>Following hashtag: #{{ tweetswarm.callsign }}</h4>
+            {% endif %}
 		</a>
 	</div>
 	</li>
@@ -28,7 +30,9 @@
 		<label for="name">TweetSwarm name</label>
 		<input name="name" id="name" class="required" minlength="1" type="text">
 		<label for="account">Account to retweet</label>
-		<input name="account" id="account" class="required" minlength="1" type="text">
+		<div class="input-prepend">
+            <span class="add-on">@</span><input name="account" id="account" minlength="1" type="text">
+        </div>
 		<label for="callsign">Callsign to watch for</label>
 		<div class="input-prepend">
 			<span class="add-on">#</span><input name="callsign" id="callsign" type="text" size="8" class="required" minlength="1">
