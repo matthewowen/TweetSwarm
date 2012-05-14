@@ -53,7 +53,7 @@ def callback():
 
 # INPUT
 
-@app.route('/tweetswarms/<tweetswarm>/', methods=['GET', 'POST'])
+@app.route('/tweetswarms/<int:tweetswarm>/', methods=['GET', 'POST'])
 def botnet(tweetswarm):
 	"""
 	if get, tweetswarm info
